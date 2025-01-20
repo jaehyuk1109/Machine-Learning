@@ -1,7 +1,7 @@
 print("hello world")
 
-import numpy as np
-import matplotlib.pyplot as plt
+import numpy as np # type: ignore
+import matplotlib.pyplot as plt # type: ignore
 
 x_train = np.array([0.5275850943761389, 1.259210705775408, -1.3997210858463067, -0.14545194148894652, -0.23315632348299936, 
  2.1999302867483994, 2.5476636693983554, -2.2310687558043543, 0.4933533888500445, -0.5634904487431606, 
