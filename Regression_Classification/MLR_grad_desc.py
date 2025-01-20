@@ -84,7 +84,7 @@ print(mean, "\n")
 print(std, "\n")
 print(X_train_norm)
 an_w, an_b = gradient_descent(X_train_norm, y_train, w_in, b_in, 10**-4)
-an_w, an_b = gradient_descent(X_train, y_train, w_in, b_in, 5e-7)
+#an_w, an_b = gradient_descent(X_train, y_train, w_in, b_in, 5e-7)
 
 #print(cost_function(X_train, y_train, w_in, b_in))
 
@@ -230,4 +230,4 @@ print(len(real_y_train))
 
 print(np.dot(real_X_train, w_in))
 an_w, an_b = gradient_descent(real_X_train_norm, real_y_train, w_in, b_in, 10**-3)
-print(sum((np.dot(real_X_train_norm, an_w) - an_b)**2))
+
