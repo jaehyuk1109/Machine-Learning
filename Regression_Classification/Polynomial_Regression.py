@@ -65,5 +65,6 @@ an_w1, an_w2, an_b = gradient_descent(x, y, w1 = 0, w2 = 0, b = 0, alpha= 10**-4
 
 plt.scatter(x, y)
 plt.plot(x , float(an_w1) * x**2 + float(an_w2) * x +  float(an_b))
+plt.contour(x1, x2, z, levels=[0], colors='blue')  # 타원 경계를 그림
 plt.show()
 
