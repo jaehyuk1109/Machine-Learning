@@ -248,9 +248,3 @@ answer = predict(an_wre, an_bre, test_data)
 print(np.around(answer,1))
 print(test_data_answer)
 
-
-print(len(test_data), len(test_data_answer))
-plt.scatter(x = test_data, y = test_data_answer, c= 0)
-
-plt.scatter(x = real_X_train, y = real_y_train, c= 1)
-plt.show
