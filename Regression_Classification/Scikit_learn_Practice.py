@@ -4,110 +4,11 @@ import numpy as np # type: ignore
 import pandas as pd # type: ignore
 import matplotlib.pyplot as plt # type: ignore
 import seaborn as sns # type: ignore
+from sklearn.linear_model import LogisticRegression # type: ignore
+from sklearn.linear_model import SGDRegressor # type: ignore
+from sklearn.preprocessing import StandardScaler # type: ignore
 
-X_train = np.array([[2104, 5, 1, 45], [1416, 3, 2, 40], [852, 2, 1, 35]])
-y_train = np.array([460, 232, 178])
-
-w = np.array([ 0.39133535, 18.75376741, -53.36032453, -26.42131618])
-b = 785.1811367994083
-
-#print(1/(2*3)*sum((np.dot(X_train, w) +  b - y_train)**2))
-# print(len(X_train))
-
-print(np.dot(X_train, w) +  b - y_train)
-
-print(np.dot(np.dot(X_train, w) +  b - y_train, X_train[:,1]))
-print(np.dot(np.dot(X_train, w) +  b - y_train, X_train))
-
-def cost_function(x, y, w, b):
-    m = len(y)
-    cost = 1/(2*m) * np.sum(  (np.dot(x, w) + b - y)**2  )
-    return cost
-
-
-def derivative(x, y, w, b):
-    m = len(y)
-    d_dw = 1 / m * np.dot((np.dot(x, w) + b - y), x)
-    d_db = 1 / m * np.sum((np.dot(x, w) + b - y))
-    return d_dw, d_db
-
-
-def gradient_descent(x, y, w, b, alpha):   
-    i = 0
-    #while(sum((np.dot(x, w) + b - y))> 10**-7):
-    while(i <= 50000):
-        d_dw, d_db = derivative(x, y, w, b)
-        w = w - alpha * d_dw
-        b = b - alpha * d_db
-        i += 1
-        if (i %10000== 0):
-            print(cost_function(x, y, w, b))
-    print(w, b)
-    return w, b
-
-
-## GPT
-# def gradient_descent(x, y, w, b, alpha, max_iters=1000000, tolerance=1e-4):   
-#     for i in range(max_iters):
-#         d_dw, d_db = derivative(x, y, w, b)
-#         w = w - alpha * d_dw
-#         b = b - alpha * d_db
-
-#         # 수렴 조건: 기울기의 크기 또는 코스트 함수 값 변화
-#         cost = cost_function(x, y, w, b)
-#         if i % 10000 == 0:  # 진행 상태 출력
-#             print(f"Iteration {i}, Cost: {cost}")
-
-#         if np.linalg.norm(d_dw) < tolerance and abs(d_db) < tolerance:
-#             print(f"Converged at iteration {i}")
-#             break
-
-#     print("Final weights and bias:", w, b)
-#     return w, b
-
-
-
-
-print(derivative(X_train, y_train, w, b))
-print("\n")
-
-w_in = np.arange(4)
-b_in = 0
-
-mean = np.mean(X_train, axis=0)
-std = np.std(X_train, axis=0)
-X_train_norm = (X_train - mean) / std
-
-
-print(mean, "\n")
-
-print(std, "\n")
-print(X_train_norm)
-an_w, an_b = gradient_descent(X_train_norm, y_train, w_in, b_in, 10**-4)
-#an_w, an_b = gradient_descent(X_train, y_train, w_in, b_in, 5e-7)
-
-#print(cost_function(X_train, y_train, w_in, b_in))
-
-#print(derivative(X_train, y_train, an_w, an_b))
-
-
-print(sum((np.dot(X_train_norm, an_w) + an_b - y_train)**2)/6)
-print((np.dot(X_train_norm, an_w) + an_b))
-
-
-
-
-
-print(an_w / std)
-print( -sum((an_w / std) * mean) + an_b)
-
-an_wre = an_w / std
-an_bre =  -sum((an_w / std) * mean) + an_b
-
-print((np.dot(X_train, an_wre) + an_bre))
-
-
-real_X_train = np.array([[1.24e+03, 3.00e+00, 1.00e+00, 6.40e+01],
+X_train = np.array([[1.24e+03, 3.00e+00, 1.00e+00, 6.40e+01],
        [1.95e+03, 3.00e+00, 2.00e+00, 1.70e+01],
        [1.72e+03, 3.00e+00, 2.00e+00, 4.20e+01],
        [1.96e+03, 3.00e+00, 2.00e+00, 1.50e+01],
@@ -194,9 +95,7 @@ real_X_train = np.array([[1.24e+03, 3.00e+00, 1.00e+00, 6.40e+01],
        [1.55e+03, 3.00e+00, 2.00e+00, 1.60e+01],
        [8.82e+02, 3.00e+00, 1.00e+00, 4.90e+01],
        [2.03e+03, 4.00e+00, 2.00e+00, 4.50e+01],
-       [1.04e+03, 3.00e+00, 1.00e+00, 6.20e+01]])
-
-test_data = np.array([
+       [1.04e+03, 3.00e+00, 1.00e+00, 6.20e+01],
        [1.62e+03, 3.00e+00, 1.00e+00, 1.60e+01],
        [8.03e+02, 2.00e+00, 1.00e+00, 8.00e+01],
        [1.43e+03, 3.00e+00, 2.00e+00, 2.10e+01],
@@ -208,8 +107,7 @@ test_data = np.array([
        [1.66e+03, 3.00e+00, 2.00e+00, 1.90e+01],
        [1.21e+03, 3.00e+00, 1.00e+00, 2.00e+01],
        [1.05e+03, 2.00e+00, 1.00e+00, 6.50e+01]])
-
-real_y_train = np.array([300.  , 509.8 , 394.  , 540.  , 415.  , 230.  , 560.  , 294.  ,
+y_train = np.array([300.  , 509.8 , 394.  , 540.  , 415.  , 230.  , 560.  , 294.  ,
        718.2 , 200.  , 302.  , 468.  , 374.2 , 388.  , 282.  , 311.8 ,
        401.  , 449.8 , 301.  , 502.  , 340.  , 400.28, 572.  , 264.  ,
        304.  , 298.  , 219.8 , 490.7 , 216.96, 368.2 , 280.  , 526.87,
@@ -219,38 +117,37 @@ real_y_train = np.array([300.  , 509.8 , 394.  , 540.  , 415.  , 230.  , 560.  ,
        350.  , 460.  , 237.  , 288.3 , 282.  , 249.  , 304.  , 332.  ,
        351.8 , 310.  , 216.96, 666.34, 330.  , 480.  , 330.3 , 348.  ,
        304.  , 384.  , 316.  , 430.4 , 450.  , 284.  , 275.  , 414.  ,
-       258.  , 378.  , 350.  , 412.  , 373.  , 225.  , 390.  , 267.4 ])
-
-test_data_answer = np.array([
+       258.  , 378.  , 350.  , 412.  , 373.  , 225.  , 390.  , 267.4 ,
        464.  , 174.  , 340.  , 430.  , 440.  , 216.  , 329.  , 388.  ,
        390.  , 356.  , 257.8 ])
 
-meandata = np.mean(real_X_train, axis=0)
-stddata = np.std(real_X_train, axis=0)
-real_X_train_norm = (real_X_train - meandata) / stddata
-print(real_X_train_norm)
-print(len(real_y_train))
+# Gradient descent
 
 
-print(np.dot(real_X_train, w_in))
-an_w, an_b = gradient_descent(real_X_train_norm, real_y_train, w_in, b_in, 10**-3)
+## scale data
+scaler = StandardScaler()
+X_norm = scaler.fit_transform(X_train)
 
-def predict(w, b, x):
-    return np.dot(x, w) + b
+## Create Redgression Model
+sgdr = SGDRegressor(max_iter=1000)
+sgdr.fit(X_norm, y_train)
 
-an_wre = an_w / stddata
-an_bre =  -sum((an_w / stddata) * meandata) + an_b
+print(sgdr)
 
-answer = predict(an_wre, an_bre, test_data)
+b_norm = sgdr.intercept_
+w_norm = sgdr.coef_
+print(f"model parameters:                         w : {w_norm}, b:{b_norm}")
 
+## IN MLR_grad_desc.py
+print(f"model parameters for handmade Regressor : w : [110.68543496 -21.40075496 -32.70120024 -37.85828036], b: 363.15606060603227")
 
-## similiar!!
-print(np.around(answer,1))
-print(test_data_answer)
+# Logistic Regression
 
+X = np.array([[0.5, 1.5], [1,1], [1.5, 0.5], [3, 0.5], [2, 2], [1, 2.5]])
+y = np.array([0, 0, 0, 1, 1, 1])
 
-print(len(test_data), len(test_data_answer))
-plt.scatter(x = test_data, y = test_data_answer, c= 0)
+lr_model = LogisticRegression()
+lr_model.fit(X, y)
 
-plt.scatter(x = real_X_train, y = real_y_train, c= 1)
-plt.show
+y_pred = lr_model.predict(X)
+print("Prediction on training set:", y_pred)
