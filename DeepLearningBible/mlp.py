@@ -339,6 +339,7 @@ class sequential:
     self.optimizer = optimizer
     self.learning_rate = learning_rate
 
+
     self.optimizer.config(self.layers)
     self.optimizer.learning_rate = learning_rate
 
@@ -358,15 +359,16 @@ class sequential:
 
   def compute_loss(self, y):
 
-    l_sum = np.sum(y * np.log(self.A[len(self.layers)]))
+    l_sum = np.sum(np.log(self.A[len(self.layers)] + 1e-8))
     m = y.shape[0]
     loss = -(1./m)* l_sum
-    return loss
 
-    #l_sum = np.sum(np.log(self.A[len(self.layers)] + 1e-8))
-    #m = y.shape[0]
-    #loss = -(1./m)* l_sum
-    #return loss
+    if(self.loss == "CAT"):
+      l_sum = np.sum(y * np.log(self.A[len(self.layers)] + 1e-8))
+      m = y.shape[0]
+      loss = -(1./m)* l_sum
+      return loss
+    return loss
 
 
   def fit(self, X, y, epochs = 1000, batch_size = 32):
@@ -389,7 +391,7 @@ class sequential:
       for batch_idx in range(num_batches):
         start = batch_idx * self.batch_size
         end = np.minimum((batch_idx + 1) * self.batch_size, X.shape[0]-1)
-        X_batch = X[start: end, :]
+        X_batch = X[start: end]
         y_batch = y[start: end]
 
         # Forward
@@ -398,7 +400,6 @@ class sequential:
         yhat = self.forward(X_batch)
         loss = self.compute_loss(y_batch)
         epoch_loss.append(loss)
-        self.train_losses.append(loss)
 
         # Backprop
 
@@ -410,6 +411,7 @@ class sequential:
 
       # loss
       train_loss = np.mean(epoch_loss) / len(epoch_loss)
+      self.train_losses.append(train_loss)
       print(f"epoch = {epoch + 1}/{epochs}, loss = {train_loss}")
     print("------------------------------------------------------------")
 
@@ -481,6 +483,15 @@ X_test = X_test.reshape(X_test.shape[0], -1)
 X_train = np.array(X_train/255., dtype=np.float32)
 X_test  = np.array(X_test/255., dtype=np.float32)
 
+def one_hot(y):
+  lst = []
+  for i in y:
+    a = np.zeros(10)
+    a[i] = 1.0
+    lst.append(a)
+  return np.array(lst)
+hot_y_train = one_hot(y_train)
+
 # Commented out IPython magic to ensure Python compatibility.
 # visualizing the first 10 images in the dataset and their labels
 # %matplotlib inline
@@ -492,16 +503,6 @@ for i in range(10):
     plt.axis('off')
 plt.show()
 print('label for each of the above image: %s' % (y_train[0:10]))
-
-from sklearn.datasets import make_moons
-
-X, y = make_moons(n_samples=1000, noise=0.7, random_state=42)
-
-plt.scatter(X[:, 0], X[:, 1], c=y, cmap="bwr", edgecolors="k", s=50)
-plt.xlabel("Feature 1")
-plt.ylabel("Feature 2")
-plt.title("Make Moons Dataset (Nonlinear)")
-plt.show()
 
 model = sequential(layers = [
     layer(64, activation="relu"),
@@ -529,6 +530,53 @@ def run_model(opt = None):
   model.fit(X_train, y_train, epochs= 30)
   return model.train_losses
 
+plt.figure(figsize = (25, 12))
+for col, (i, l) in enumerate(zip(opt, name)):
+  loss_red = run_model(i)
+  plt.plot(np.arange(len(loss_red)), loss_red, alpha = 0.8, color=f"C{col}", label=l)
+plt.legend()
+plt.show()
+
+model = sequential([
+    layer(64, activation="relu"),
+    layer(32, activation="relu"),
+    layer(10, activation="softmax")
+])
+
+model.complie(optimizer=adam, loss="CAT", learning_rate=1e-2)
+
+model.fit(X_train, hot_y_train, epochs = 30)
+
+from sklearn.metrics import accuracy_score
+an = []
+for i in model.forward(X_train):
+  answer = i.argmax()
+  an.append(answer)
+y_pred = np.array(an)
+
+print(f"Train accuracy socre : {accuracy_score(y_train, y_pred)}")
+
+an = []
+for i in model.forward(X_test):
+  answer = i.argmax()
+  an.append(answer)
+y_train_pred = np.array(an)
+
+print(f"Test accuracy socre : {accuracy_score(y_test, y_train_pred)}")
+
+## Opimizer compare
+
+def run_model(opt = None):
+  np.random.seed(100)
+  model = sequential(layers = [
+    layer(16, activation="relu"), ## make more simple model
+    layer(10, activation="softmax")
+    ])
+  model.complie(optimizer=opt, loss = "CAT",learning_rate=1e-3)
+  model.fit(X_train, hot_y_train, epochs= 30)
+  return model.train_losses
+
+plt.figure(figsize=(25, 12))
 for col, (i, l) in enumerate(zip(opt, name)):
   loss_red = run_model(i)
   plt.plot(np.arange(len(loss_red)), loss_red, alpha = 0.8, color=f"C{col}", label=l)
